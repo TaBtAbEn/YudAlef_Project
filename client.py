@@ -11,6 +11,9 @@ from time import sleep
 # sign variable to decide the turn of which player
 sign = 0
 my_socket = socket.socket()
+done_turn = "need board"
+give_turn = "dont know my turn"
+player_shape = None
 
 #XY = my_socket.recv(2048).decode()
 #int(XY)
@@ -52,9 +55,11 @@ def update_board(i, j, gb, l1, l2, myName):
         boardData=pickle.dumps(board)
         my_socket.send(boardData)
         #קבלה של מערך הלוח ועדכון הלוח
-        data = pickle.loads(my_socket.recv(2048))
+        data = my_socket.recv(2048)
+        data = pickle.loads(data)
         print(data)
         sign += 1
+
         button[i][j].config(text=board[i][j])
     if winner(board, "X"):
         boardData=pickle.dumps([["e" for x in range(3)] for y in range(3)])
@@ -123,6 +128,15 @@ def setup(game_board, myName):
     game_board.configure(bg=backgroundcolor)
     game_board.title("Tic Tac Toe")
     my_socket.connect(("127.0.0.1", 5555))
+    #my_socket.send(give_turn.encode())
+    data = my_socket.recv(2048).decode()
+    data = int(data)
+    if data % 2 == 0:
+        player_shape = "O"
+    else:
+        player_shape = "X"
+
+    print(player_shape)
     time.sleep(0.5)
     l1 = Button(game_board, text=str(myName)+" : X", activeforeground=backgroundcolor,
                 activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
