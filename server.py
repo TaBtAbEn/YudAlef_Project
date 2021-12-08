@@ -20,7 +20,7 @@ print("Listening for clients...")
 client_sockets = []
 messages_to_send = []
 while True:
-    rlist, wlist, xlist = select.select([server_socket] + client_sockets, [], [], 0.1)
+    rlist, wlist, xlist = select.select([server_socket] + client_sockets, client_sockets, [])
     # rlist, wlist, xlist = [server_socket] + client_sockets, [], []
     for current_socket in rlist:
         if current_socket is server_socket:
@@ -28,12 +28,15 @@ while True:
             print("New client joined!", client_address)
             client_sockets.append(connection)
             print_client_sockets(client_sockets)
+            c = int(c)
             c = c+1
-            str(c)
+            c = str(c)
+            connection.send(c.encode())
             print("Number of people that enter the server: ",c)
         else:
             #if current_socket in wlist:
             data = pickle.loads(current_socket.recv(MAX_MSG_LENGTH))
+
 
             if data == [['e', 'e', 'e'], ['e', 'e', 'e'], ['e', 'e', 'e']]: # client disconnected!!!
                 print("Connection closed with ",current_socket )
@@ -46,9 +49,11 @@ while True:
 
                 messages_to_send.append((current_socket, data))
                 #((sock1, messahe_to_sock1), (sock2, message_to_sock2)...)
+
     for message_tuple in messages_to_send: #message_tuple = (sock_i, message_to_sock_i)
         current_socket, message = message_tuple
         for send_socket in client_sockets:
             if current_socket != send_socket:
+
                 send_socket.send(sendData)
     messages_to_send = []
