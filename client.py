@@ -40,7 +40,7 @@ def winner(b, XorO):
 
 
 # Configure text on button while playing with another player
-def update_board(i, j, gb, l1, l2, myName):
+def update_board_for_X(i, j, gb, l1, l2, myName):
     global sign
     if board[i][j] == ' ':
         if sign % 2 == 0:
@@ -55,9 +55,9 @@ def update_board(i, j, gb, l1, l2, myName):
         boardData=pickle.dumps(board)
         my_socket.send(boardData)
         #קבלה של מערך הלוח ועדכון הלוח
-        data = my_socket.recv(2048)
-        data = pickle.loads(data)
-        print(data)
+        newBoard = my_socket.recv(2048)
+        newBoard = pickle.loads(newBoard)
+        print(newBoard)
         sign += 1
 
         button[i][j].config(text=board[i][j])
@@ -138,14 +138,24 @@ def setup(game_board, myName):
 
     print(player_shape)
     time.sleep(0.5)
-    l1 = Button(game_board, text=str(myName)+" : X", activeforeground=backgroundcolor,
-                activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
-    l1.grid(row=1, column=1)
+    if player_shape == "X":
+        l1 = Button(game_board, text=str(myName)+" : X", activeforeground=backgroundcolor,
+                    activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
+        l1.grid(row=1, column=1)
 
-    l2 = Button(game_board, text="opponent : O",  activeforeground=backgroundcolor,
-                activebackground=clicked, bg=backgroundcolor, fg=textcolor,  disabledforeground='gray')
-    l2.grid(row=2, column=1)
-    gameboard(game_board, l1, l2, myName)
+        l2 = Button(game_board, text="opponent : O",  activeforeground=backgroundcolor,
+                    activebackground=clicked, bg=backgroundcolor, fg=textcolor,  disabledforeground='gray')
+        l2.grid(row=2, column=1)
+        gameboard(game_board, l1, l2, myName)
+    else:
+        l1 = Button(game_board, text=str(myName) + " : O", activeforeground=backgroundcolor,
+                    activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
+        l1.grid(row=1, column=1)
+
+        l2 = Button(game_board, text="opponent : X", activeforeground=backgroundcolor,
+                    activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
+        l2.grid(row=2, column=1)
+        gameboard(game_board, l1, l2, myName)
 
 
 
@@ -160,6 +170,10 @@ B2 = Button(menu, text="play", command=wpl , activeforeground=backgroundcolor,
             width=200, font='summer', bd=5)
 B2.pack()
 menu.mainloop()
+
+
+
+
 
 
 
