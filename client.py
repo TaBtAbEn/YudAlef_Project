@@ -110,7 +110,7 @@ def gameboard(game_board, l1, l2, myName):
             n = j
             button[i].append(j)
             #if c%2==0:
-            get_t = partial(update_board, i, j, game_board, l1, l2, myName)
+            get_t = partial(update_board_for_X, i, j, game_board, l1, l2, myName)
             #else:
                # get_t=partial(resieve)
             button[i][j] = Button(game_board, bd=5, command=get_t, height=4, width=8, activeforeground=backgroundcolor,
