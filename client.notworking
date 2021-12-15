@@ -39,8 +39,42 @@ def winner(b, XorO):
             (b[0][2] == XorO and b[1][1] == XorO and b[2][0] == XorO))
 
 
+def print_board( newBoard):
+    for i in range(3):
+        for j in range(3):
+          button[i][j].config(text=newBoard[i][j])
+
+
+def update_board_recv(gb, l1, l2, myName):
+    newBoard = my_socket.recv(2048)
+    newBoard = pickle.loads(newBoard)
+    print(newBoard)
+
+    print_board(newBoard)
+    if winner(board, "X"):
+        boardData = pickle.dumps([["e" for x in range(3)] for y in range(3)])
+        my_socket.send(boardData)
+        box = messagebox.showinfo("Winner", myName + ", won the match")
+        sleep(2)
+        gb.destroy()
+    elif winner(board, "O"):
+        boardData = pickle.dumps([["e" for x in range(3)] for y in range(3)])
+        my_socket.send(boardData)
+        box = messagebox.showinfo("Winner", "O won the match")
+        sleep(2)
+        gb.destroy()
+    elif (isfull()):
+        boardData = pickle.dumps([["e" for x in range(3)] for y in range(3)])
+        my_socket.send(boardData)
+        box = messagebox.showinfo("Tie Game", "Tie Game")
+        sleep(2)
+        gb.destroy()
+
+
+
+
 # Configure text on button while playing with another player
-def update_board_for_X(i, j, gb, l1, l2, myName):
+def update_board_send(i, j, gb, l1, l2, myName):
     global sign
     if board[i][j] == ' ':
         if sign % 2 == 0:
@@ -55,12 +89,9 @@ def update_board_for_X(i, j, gb, l1, l2, myName):
         boardData=pickle.dumps(board)
         my_socket.send(boardData)
         #קבלה של מערך הלוח ועדכון הלוח
-        newBoard = my_socket.recv(2048)
-        newBoard = pickle.loads(newBoard)
-        print(newBoard)
         sign += 1
-
         button[i][j].config(text=board[i][j])
+
     if winner(board, "X"):
         boardData=pickle.dumps([["e" for x in range(3)] for y in range(3)])
         my_socket.send(boardData)
@@ -79,6 +110,9 @@ def update_board_for_X(i, j, gb, l1, l2, myName):
         box = messagebox.showinfo("Tie Game", "Tie Game")
         sleep(2)
         gb.destroy()
+    #demo = partial(update_board_recv, gb, l1, l2, myName)
+    gb.after(500, lambda: update_board_recv(gb, l1, l2, myName))
+    # update_board_recv(gb, l1, l2, myName)
 
 
 
@@ -97,7 +131,7 @@ def isfull():
 
 
 # Create the GUI of game board for play along with another player
-def gameboard(game_board, l1, l2, myName):
+def gameboard(game_board, l1, l2, myName, PS):
     global button
 
     button = []
@@ -108,25 +142,20 @@ def gameboard(game_board, l1, l2, myName):
         for j in range(3):
             n = j
             button[i].append(j)
-
-
-            get_t = partial(update_board_for_X, i, j, game_board, l1, l2, myName)
-            #else:
-               # get_t=partial(resieve)
+            get_t = partial(update_board_send, i, j, game_board, l1, l2, myName)
             button[i][j] = Button(game_board, bd=5, command=get_t, height=4, width=8, activeforeground=backgroundcolor,
                                   activebackground=clicked, bg=backgroundcolor, fg=textcolor, font=20)
             button[i][j].grid(row=m, column=n)
 
-    if player_shape == "O":
-        first_move = pickle.loads(my_socket.recv(2048))
-        for x in range(3):
-            for y in range(3):
-                print("first move append")
-                button[x][y] = first_move[x][y]
+    if PS == "O":
+        demo = partial(update_board_recv, game_board, l1, l2, myName)
+        game_board.after(500, lambda: update_board_recv(game_board, l1, l2, myName))
+        #update_board_recv(game_board, l1, l2, myName)
 
     game_board.mainloop()
 
-
+def test():
+    print('test')
 
 # Initialize the game board to play with another player
 def setup(game_board, myName):
@@ -142,7 +171,7 @@ def setup(game_board, myName):
         player_shape = "O"
     else:
         player_shape = "X"
-
+    game_board.after(10, test)
     print(player_shape)
     time.sleep(0.5)
     if player_shape == "X":
@@ -153,7 +182,7 @@ def setup(game_board, myName):
         l2 = Button(game_board, text="opponent : O",  activeforeground=backgroundcolor,
                     activebackground=clicked, bg=backgroundcolor, fg=textcolor,  disabledforeground='gray')
         l2.grid(row=2, column=1)
-        gameboard(game_board, l1, l2, myName)
+        gameboard(game_board, l1, l2, myName, player_shape)
     else:
         l1 = Button(game_board, text=str(myName) + " : O", activeforeground=backgroundcolor,
                     activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
@@ -162,7 +191,7 @@ def setup(game_board, myName):
         l2 = Button(game_board, text="opponent : X", activeforeground=backgroundcolor,
                     activebackground=clicked, bg=backgroundcolor, fg=textcolor, disabledforeground='gray')
         l2.grid(row=2, column=1)
-        gameboard(game_board, l1, l2, myName)
+        gameboard(game_board, l1, l2, myName, player_shape)
 
 
 
