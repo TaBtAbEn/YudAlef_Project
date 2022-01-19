@@ -45,7 +45,7 @@ def print_board( newBoard):
           button[i][j].config(text=newBoard[i][j])
 
 
-def update_board_recv(gb, l1, l2, myName):
+def update_board_recv(gb, l1, l2, myName, PS):
     newBoard = my_socket.recv(2048)
     newBoard = pickle.loads(newBoard)
     print(newBoard)
@@ -74,23 +74,35 @@ def update_board_recv(gb, l1, l2, myName):
 
 
 # Configure text on button while playing with another player
-def update_board_send(i, j, gb, l1, l2, myName):
+def update_board_send(i, j, gb, l1, l2, myName, PS):
     global sign
     if board[i][j] == ' ':
-        if sign % 2 == 0:
-            l1.config(state=DISABLED)
-            l2.config(state=ACTIVE)
-            board[i][j] = "X"
-        else:
-            l2.config(state=DISABLED)
-            l1.config(state=ACTIVE)
-            board[i][j] = "O"
+        if PS=='X':
+            if sign % 2 == 0:
+                l1.config(state=DISABLED)
+                l2.config(state=ACTIVE)
+                board[i][j] = "X"
+            else:
+                l2.config(state=DISABLED)
+                l1.config(state=ACTIVE)
+                board[i][j] = "x"
+        if PS=='O':
+            if sign % 2 == 0:
+                l1.config(state=DISABLED)
+                l2.config(state=ACTIVE)
+                board[i][j] = "O"
+            else:
+                l2.config(state=DISABLED)
+                l1.config(state=ACTIVE)
+                board[i][j] = "O"
         #send the board to the server
         boardData=pickle.dumps(board)
         my_socket.send(boardData)
         #קבלה של מערך הלוח ועדכון הלוח
         sign += 1
-        button[i][j].config(text=board[i][j])
+
+        print_board(board)
+        #button[i][j].config(text=board[i][j])
 
     if winner(board, "X"):
         boardData=pickle.dumps([["e" for x in range(3)] for y in range(3)])
@@ -111,7 +123,7 @@ def update_board_send(i, j, gb, l1, l2, myName):
         sleep(2)
         gb.destroy()
     #demo = partial(update_board_recv, gb, l1, l2, myName)
-    gb.after(500, lambda: update_board_recv(gb, l1, l2, myName))
+    gb.after(500, lambda: update_board_recv(gb, l1, l2, myName, PS))
     # update_board_recv(gb, l1, l2, myName)
 
 
@@ -142,14 +154,14 @@ def gameboard(game_board, l1, l2, myName, PS):
         for j in range(3):
             n = j
             button[i].append(j)
-            get_t = partial(update_board_send, i, j, game_board, l1, l2, myName)
+            get_t = partial(update_board_send, i, j, game_board, l1, l2, myName, PS)
             button[i][j] = Button(game_board, bd=5, command=get_t, height=4, width=8, activeforeground=backgroundcolor,
                                   activebackground=clicked, bg=backgroundcolor, fg=textcolor, font=20)
             button[i][j].grid(row=m, column=n)
 
     if PS == "O":
         demo = partial(update_board_recv, game_board, l1, l2, myName)
-        game_board.after(500, lambda: update_board_recv(game_board, l1, l2, myName))
+        game_board.after(500, lambda: update_board_recv(game_board, l1, l2, myName, PS))
         #update_board_recv(game_board, l1, l2, myName)
 
     game_board.mainloop()
@@ -206,7 +218,6 @@ B2 = Button(menu, text="play", command=wpl , activeforeground=backgroundcolor,
             width=200, font='summer', bd=5)
 B2.pack()
 menu.mainloop()
-
 
 
 
