@@ -42,7 +42,8 @@ def winner(b, XorO):
 def print_board( newBoard):
     for i in range(3):
         for j in range(3):
-          button[i][j].config(text=newBoard[i][j])
+            button[i][j].config(text=newBoard[i][j])
+            board[i][j] = newBoard[i][j]
 
 
 def update_board_recv(gb, l1, l2, myName, PS):
@@ -85,7 +86,7 @@ def update_board_send(i, j, gb, l1, l2, myName, PS):
             else:
                 l2.config(state=DISABLED)
                 l1.config(state=ACTIVE)
-                board[i][j] = "x"
+                board[i][j] = "X"
         if PS=='O':
             if sign % 2 == 0:
                 l1.config(state=DISABLED)
@@ -218,7 +219,6 @@ B2 = Button(menu, text="play", command=wpl , activeforeground=backgroundcolor,
             width=200, font='summer', bd=5)
 B2.pack()
 menu.mainloop()
-
 
 
 
